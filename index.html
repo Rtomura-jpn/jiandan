@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国語単語学習</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .lesson-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .lesson-tab {
+            flex: 1;
+            padding: 15px 10px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            border-right: 1px solid #e9ecef;
+        }
+
+        .lesson-tab:last-child {
+            border-right: none;
+        }
+
+        .lesson-tab.active {
+            background: #007bff;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+        }
+
+        .lesson-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .hide-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .hide-option {
+            background: #e9ecef;
+            border: 2px solid #dee2e6;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .hide-option.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+
+
+        .word-list {
+            padding: 20px;
+        }
+
+        .word-item {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .word-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .word-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .word-field {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .word-field.chinese {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .word-field.pinyin {
+            background: #d1ecf1;
+            border: 2px solid #a6d8e6;
+            font-style: italic;
+        }
+
+        .word-field.meaning {
+            background: #d4edda;
+            border: 2px solid #a3d977;
+        }
+
+        .word-field.hidden {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            color: #6c757d;
+        }
+
+        .word-field.hidden:hover {
+            background: #e9ecef;
+        }
+
+        .example-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .example-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .example-text {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            border-radius: 5px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .example-text.hidden {
+            display: none;
+        }
+
+        .example-chinese {
+            color: #d63384;
+            font-weight: bold;
+        }
+
+        .example-translation {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .lesson-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .lesson-tab {
+                font-size: 12px;
+                padding: 10px 5px;
+            }
+            
+            .word-content {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .word-field {
+                min-height: 40px;
+                font-size: 14px;
+            }
+            
+            .word-field.chinese {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>中国語単語学習</h1>
+            <p>タップして単語を覚えよう！</p>
+        </div>
+
+        <div class="lesson-tabs">
+            <button class="lesson-tab active" data-lesson="1">1課</button>
+            <button class="lesson-tab" data-lesson="2">2課</button>
+            <button class="lesson-tab" data-lesson="3">3課</button>
+            <button class="lesson-tab" data-lesson="4">4課</button>
+            <button class="lesson-tab" data-lesson="5">5課</button>
+            <button class="lesson-tab" data-lesson="6">6課</button>
+        </div>
+
+
+
+        <div class="controls">
+            <div class="control-group">
+                <label>非表示にする項目を選択:</label>
+                <div class="hide-options">
+                    <div class="hide-option" data-field="chinese">漢字</div>
+                    <div class="hide-option active" data-field="pinyin">ピンイン</div>
+                    <div class="hide-option" data-field="meaning">意味</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="word-list" id="wordList">
+            <!-- 単語がここに表示されます -->
+        </div>
+    </div>
+
+    <script>
+        const lessons = {
+            1:[
+                ["第", "dì", "第～", "这是第一课。", "これは第一課です。"],
+                ["课", "kè", "～課", "今天我们学习第一课。", "今日私たちは第一課を学習します。"],
+                ["自我", "zìwǒ", "自己", "自我介绍很重要。", "自己紹介は重要です。"]
+                ],
+            2:[
+                ["去", "qù", "行く", "我去食堂。", "私は食堂に行きます。"],
+                ["食堂", "shítáng", "食堂", "食堂的饭很好吃。", "食堂のご飯はとても美味しいです。"],
+                ["今天", "jīntiān", "今日", "今天天气很好。", "今日は天気がよいです。"]
+                ],
+            3:[
+                ["家", "jiā", "家", "我的家在横滨。", "私の家は横浜にあります。"],
+                ["在", "zài", "ある、いる", "我在家里。", "私は家にいます。"],
+                ["横滨", "Héngbīn", "横浜", "横滨很漂亮。", "横浜はとても美しいです。"]
+                ],
+            4:[
+                ["打工", "dǎgōng", "アルバイトをする", "我在餐厅打工。", "私はレストランでアルバイトをしています。"],
+                ["要", "yào", "かかる、要する", "从家到公司要一个小时。", "家から会社まで1時間かかります。"],
+                ["多长", "duōcháng", "どれくらい長い", "这条路有多长？", "この道はどれくらい長いですか？"]
+                ],
+            5:[
+                ["对", "duì", "～について", "我对历史很感兴趣。", "私は歴史にとても興味があります。"],
+                ["世界", "shìjiè", "世界", "世界很大，也很精彩。", "世界は広く、素晴らしいです。"],
+                ["遗产", "yíchǎn", "遺産", "长城是中国的重要文化遗产。", "万里の長城は中国の重要な文化遺産です。"]
+                ],
+            6: [
+                ["各地", "gèdì", "各地", "这个节日在中国各地都很受欢迎。", "この祭りは中国各地で人気があります。"],
+                ["文化", "wénhuà", "文化", "我喜欢学习不同国家的文化。", "私はさまざまな国の文化を学ぶのが好きです。"],
+                ["差异", "chāyì", "違い", "东西方文化有很大的差异。", "東洋と西洋の文化には大きな違いがあります。"]
+                ]
+        };
+
+        let currentLesson = 1;
+        let hiddenFields = ['pinyin']; // デフォルトでピンインを非表示
+
+        function init() {
+            setupLessonTabs();
+            setupControls();
+            loadLesson(currentLesson);
+        }
+
+        function setupLessonTabs() {
+            document.querySelectorAll('.lesson-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const lesson = parseInt(this.dataset.lesson);
+                    switchLesson(lesson);
+                });
+            });
+        }
+
+        function switchLesson(lesson) {
+            document.querySelectorAll('.lesson-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-lesson="${lesson}"]`).classList.add('active');
+
+            currentLesson = lesson;
+            loadLesson(lesson);
+        }
+
+        function loadLesson(lesson) {
+            const words = lessons[lesson];
+            renderWords(words);
+        }
+
+        function renderWords(words) {
+            const wordList = document.getElementById('wordList');
+            wordList.innerHTML = '';
+
+            words.forEach((word, index) => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-item';
+                wordItem.innerHTML = `
+                    <div class="word-content">
+                        <div class="word-field chinese ${hiddenFields.includes('chinese') ? 'hidden' : ''}" 
+                             data-field="chinese" data-index="${index}">
+                            ${hiddenFields.includes('chinese') ? 'タップして表示' : word[0]}
+                        </div>
+                        <div class="word-field pinyin ${hiddenFields.includes('pinyin') ? 'hidden' : ''}" 
+                             data-field="pinyin" data-index="${index}">
+                            ${hiddenFields.includes('pinyin') ? 'タップして表示' : word[1]}
+                        </div>
+                        <div class="word-field meaning ${hiddenFields.includes('meaning') ? 'hidden' : ''}" 
+                             data-field="meaning" data-index="${index}">
+                            ${hiddenFields.includes('meaning') ? 'タップして表示' : word[2]}
+                        </div>
+                    </div>
+                    <button class="example-btn" onclick="toggleExample(${currentLesson}, ${index})">例文を表示</button>
+                    <div class="example-text hidden" id="example-${currentLesson}-${index}">
+                        <div class="example-chinese">${word[3]}</div>
+                        <div class="example-translation">${word[4]}</div>
+                    </div>
+                `;
+                wordList.appendChild(wordItem);
+            });
+
+            document.querySelectorAll('.word-field').forEach(field => {
+                field.addEventListener('click', function() {
+                    const fieldType = this.dataset.field;
+                    const index = this.dataset.index;
+                    
+                    if (this.classList.contains('hidden')) {
+                        this.classList.remove('hidden');
+                        const fieldIndex = fieldType === 'chinese' ? 0 : fieldType === 'pinyin' ? 1 : 2;
+                        this.textContent = words[index][fieldIndex];
+                    }
+                });
+            });
+        }
+
+        function setupControls() {
+            document.querySelectorAll('.hide-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const field = this.dataset.field;
+                    
+                    if (this.classList.contains('active')) {
+                        this.classList.remove('active');
+                        hiddenFields = hiddenFields.filter(f => f !== field);
+                    } else {
+                        this.classList.add('active');
+                        hiddenFields.push(field);
+                    }
+                    
+                    loadLesson(currentLesson);
+                });
+            });
+        }
+
+        function toggleExample(lesson, index) {
+            const exampleDiv = document.getElementById(`example-${lesson}-${index}`);
+            const button = exampleDiv.previousElementSibling;
+            
+            if (exampleDiv.classList.contains('hidden')) {
+                exampleDiv.classList.remove('hidden');
+                button.textContent = '例文を隠す';
+            } else {
+                exampleDiv.classList.add('hidden');
+                button.textContent = '例文を表示';
+            }
+        }
+        init();
+    </script>
+</body>
+</html>
